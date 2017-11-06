@@ -6,6 +6,17 @@
 #include <fstream>
 using namespace std;
 
+
+//not sure if i should put this in a loop or make function
+//ask the user for filename and returns a bitmap of the file
+// all the file io is done in this function
+Bitmap get_file();
+
+//do the logic to make the composite in this function
+Bitmap make_composite(Bitmap bmp);
+
+//hmm what else
+
 int main()
 {
   // repeat
