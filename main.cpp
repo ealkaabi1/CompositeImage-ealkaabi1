@@ -3,48 +3,74 @@
 
 #include "bitmap.h"
 #include <iostream>
-#include <fstream>
 using namespace std;
 
-
-//not sure if i should put this in a loop or make function
-//ask the user for filename and returns a bitmap of the file
-// all the file io is done in this function
-Bitmap get_file();
+// read in the files of the bmp images and store them in the vector that
+// is passed in to it
+void fill_bitmap_vector(vector<Bitmap>& bmps);
 
 //do the logic to make the composite in this function
 Bitmap make_composite(Bitmap bmp);
 
-//hmm what else
-
 int main()
 {
-  // repeat
-    // ask user for filename until they enter 10 filenames or the input is 
-    // "DONE"
-    //
-    //
-    // if a filename has problems then print them error msg
-    //   -print if the file does not exist
-    //   -print if the file is not valid bitmap
-    //   -print of the file is not the same width and height dimension as
-    //    the first image loaded
-    //
-    // continue with other files but disregard the problem files
-    //
-    // after all of the files are read in,
-    //
-    // if the user did not give at least 2 images with width and height
-    //   -print error message
-    //   -do nothing else
-    //
-    // else combine the images
-    //
-    // loop through all of the images by the pixels
-    //    -make each pixel average of RGB values of all the pixels
-    //    -print progress updates in middle of loop to screen
-    //
-    // save file as composite-ealkaabi1.bmp
-    // exit
+  vector<Bitmap> bmps;
+  Bitmap composite;
+  
+  fill_bitmap_vector(bmps);
+  bmps = make_composite(bmps);
+
+  // save the finish product!
+  composite.save("composite-ealkaabi1.bmp");
+
   return 0;
+}
+
+
+void fill_bitmap_vector(vector<Bitmap>& bmps)
+{
+  string filename;
+  int count = 0;
+
+  // read in the filenames
+  while (count < 10 && filename != "DONE")
+  {
+    cout << "Filename #" << count+1 <<": ";
+    getline(cin, filename);
+
+    if (filename != "DONE")
+    {
+
+      Bitmap temp;
+      temp.open(filename);
+
+      if (!temp.isImage());
+      else if (bmps.size() > 0)
+      {
+        PixelMatrix first_matrix = bmps[0].toPixelMatrix();
+        PixelMatrix temp_matrix = temp.toPixelMatrix();
+
+        if (temp_matrix.size() != first_matrix.size()
+            || temp_matrix[0].size() != first_matrix[0].size())
+          cout << "\"" << filename << "\" does not have the same dimensions"
+            << " as the first image loaded." << endl;
+        else
+        {
+          count++;
+          bmps.push_back(temp);
+        }
+      }
+      else
+      {
+        count++;
+        bmps.push_back(temp);
+      }
+    }
+  }
+}
+
+Bitmap make_composite(Bitmap bmp)
+{
+  Bitmap implement;
+  return implement;
 }
