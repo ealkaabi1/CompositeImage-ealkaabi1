@@ -18,6 +18,9 @@ bool is_good_bmp(string filename);
 // helper function to check two bitmap have the same dimension
 bool equal_dimensions(Bitmap first, Bitmap second);
 
+// change the dimensions to conform to the dimension of the bmps
+void adjust_dimensions(PixelMatrix& pm, vector<Bitmap> bmps);
+
 int main()
 {
   vector<Bitmap> bmps;
@@ -27,10 +30,12 @@ int main()
   
   if (bmps.size() >= 2)
   {
+    cout << endl;
+    cout << endl;
     composite = make_composite(bmps);
     composite.save("composite-ealkaabi1.bmp");
     cout << endl;
-    cout << "Saved the composite image to \"composite-ealkaabi1.bmp\"."
+    cout << "Saved the composite image to \"composite-ealkaabi1.bmp\"!"
       << endl;
   }
   else
@@ -51,8 +56,6 @@ void fill_bitmap_vector(vector<Bitmap>& bmps)
   // read in the filenames
   while (count < 10 && filename != "DONE")
   {
-    cout << bmps.size() << endl;
-
     Bitmap temp;
 
     cout << "Filename #" << count+1 <<": ";
@@ -86,44 +89,48 @@ void fill_bitmap_vector(vector<Bitmap>& bmps)
 Bitmap make_composite(vector<Bitmap> bmps)
 {
   Bitmap composite;
-  PixelMatrix composite_matrix(bmps.size());
-  PixelMatrix bmps_matrix[bmps.size()];
+  PixelMatrix composite_matrix;
+  int image = 0;
 
-  // iterate the images and get the pixel matrices
-  for (int i = 0; i < bmps.size(); i++)
-    bmps_matrix[i] = bmps[i].toPixelMatrix();
+  adjust_dimensions(composite_matrix, bmps);
 
-  cout << endl;
-
-  // iterate the pixel matrices
-  for (int i = 0; i < bmps.size(); i++)
+  while (image < bmps.size())
   {
-    composite_matrix[i].resize(bmps_matrix[i].size());
+    PixelMatrix pm = bmps[image].toPixelMatrix();
 
-    for (int j = 0; j < bmps_matrix[i].size(); j++)
+    for (int i = 0; i < pm.size() ; i++)
     {
-      for (int k = 0; k < bmps_matrix[i][j].size(); k++)
+      for (int j = 0; j < pm[i].size() ; j++)
       {
-        composite_matrix[i][j].red += bmps_matrix[i][j][k].red;
-        composite_matrix[i][j].green += bmps_matrix[i][j][k].green;
-        composite_matrix[i][j].blue += bmps_matrix[i][j][k].blue;
+        Pixel p
+          (
+           composite_matrix[i][j].red + pm[i][j].red,
+           composite_matrix[i][j].green + pm[i][j].green,
+           composite_matrix[i][j].blue + pm[i][j].blue
+          );
+        composite_matrix[i][j] = p;
       }
     }
-    cout << "Image " << i + 1 << " of " << bmps.size() << " done." << endl;
+    cout << "Image " << image + 1 << "/" << bmps.size() << endl; 
+    cout << endl;
+    image++;
   }
 
   for (int i = 0; i < composite_matrix.size(); i++)
   {
     for (int j = 0; j < composite_matrix[i].size(); j++)
     {
-      composite_matrix[i][j].red /= bmps.size();
-      composite_matrix[i][j].green /= bmps.size();
-      composite_matrix[i][j].blue /= bmps.size();
+    
+      Pixel p
+        (
+         composite_matrix[i][j].red /= bmps.size(),
+         composite_matrix[i][j].green /= bmps.size(),
+         composite_matrix[i][j].blue /= bmps.size()
+         );
+      composite_matrix[i][j] = p;
     }
   }
-
   composite.fromPixelMatrix(composite_matrix);
-
   return composite;
 }
 
@@ -151,4 +158,21 @@ bool equal_dimensions(Bitmap first, Bitmap second)
         return false;
 
   return true;
+}
+
+void adjust_dimensions(PixelMatrix& pm, vector<Bitmap> bmps)
+{
+  if (bmps.size() > 0)
+  {
+    int width, height;
+    PixelMatrix bmps_pm = bmps[0].toPixelMatrix();
+      
+    width = bmps_pm.size();
+    height = bmps_pm[0].size();
+    
+    pm.resize(width);
+
+    for (int i = 0; i < width; i++)
+      pm[i].resize(height);
+  }
 }
